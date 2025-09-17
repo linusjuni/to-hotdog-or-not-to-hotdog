@@ -6,7 +6,7 @@ import torchvision.models as models
 
 class ConvNet(nn.Module):
     """Basic CNN for hotdog classification"""
-    def __init__(self, num_classes=2, dropout_rate=0.5):
+    def __init__(self, num_classes, dropout_rate):
         super(ConvNet, self).__init__()
         # TODO: Implement basic CNN architecture
         pass
@@ -18,7 +18,7 @@ class ConvNet(nn.Module):
 
 class ResNetBlock(nn.Module):
     """Custom ResNet-style block with skip connections"""
-    def __init__(self, in_channels, out_channels, stride=1):
+    def __init__(self, in_channels, out_channels, stride):
         super(ResNetBlock, self).__init__()
         # TODO: Implement ResNet block
         pass
@@ -30,7 +30,7 @@ class ResNetBlock(nn.Module):
 
 class CustomResNet(nn.Module):
     """Custom ResNet-inspired architecture using ResNetBlock"""
-    def __init__(self, num_classes=2, num_blocks=[2, 2, 2], channels=[64, 128, 256]):
+    def __init__(self, num_classes, num_blocks, channels):
         super(CustomResNet, self).__init__()
         # TODO: Initial convolution layer
         # TODO: Create layers using ResNetBlock with num_blocks configuration
