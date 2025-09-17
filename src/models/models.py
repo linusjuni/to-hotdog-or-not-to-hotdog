@@ -9,11 +9,11 @@ class ConvNet(nn.Module):
     def __init__(self, num_classes, dropout_rate):
         super(ConvNet, self).__init__()
         # TODO: Implement basic CNN architecture
-        pass
+        raise NotImplementedError("ConvNet.__init__ not implemented")
         
     def forward(self, x):
         # TODO: Implement forward pass
-        pass
+        raise NotImplementedError("ConvNet.forward not implemented")
 
 
 class ResNetBlock(nn.Module):
@@ -21,11 +21,11 @@ class ResNetBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride):
         super(ResNetBlock, self).__init__()
         # TODO: Implement ResNet block
-        pass
+        raise NotImplementedError("ResNetBlock.__init__ not implemented")
         
     def forward(self, x):
         # TODO: Implement forward pass with skip connection
-        pass
+        raise NotImplementedError("ResNetBlock.forward not implemented")
 
 
 class CustomResNet(nn.Module):
@@ -35,16 +35,16 @@ class CustomResNet(nn.Module):
         # TODO: Initial convolution layer
         # TODO: Create layers using ResNetBlock with num_blocks configuration
         # TODO: Global average pooling and final classifier
-        pass
+        raise NotImplementedError("CustomResNet.__init__ not implemented")
         
     def _make_layer(self, in_channels, out_channels, num_blocks, stride=1):
         """Helper method to create a layer with multiple ResNet blocks"""
         # TODO: Create a sequence of ResNetBlocks
-        pass
+        raise NotImplementedError("CustomResNet._make_layer not implemented")
         
     def forward(self, x):
         # TODO: Implement forward pass through all layers
-        pass
+        raise NotImplementedError("CustomResNet.forward not implemented")
 
 
 def get_model(model_type='simple', **kwargs):
