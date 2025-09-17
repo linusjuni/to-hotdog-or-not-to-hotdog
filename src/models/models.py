@@ -37,7 +37,7 @@ class CustomResNet(nn.Module):
         # TODO: Global average pooling and final classifier
         raise NotImplementedError("CustomResNet.__init__ not implemented")
         
-    def _make_layer(self, in_channels, out_channels, num_blocks, stride=1):
+    def _make_layer(self, in_channels, out_channels, num_blocks, stride):
         """Helper method to create a layer with multiple ResNet blocks"""
         # TODO: Create a sequence of ResNetBlocks
         raise NotImplementedError("CustomResNet._make_layer not implemented")
@@ -50,7 +50,7 @@ class CustomResNet(nn.Module):
 def get_model(model_type='simple', **kwargs):
     """Factory function to get different model types"""
     models_dict = {
-        'simple': ConvNet,
+        'cnn': ConvNet,
         'custom_resnet': CustomResNet,
     }
     
