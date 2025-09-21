@@ -12,7 +12,19 @@ from visualizations.training_plots import (
     save_training_history,
 )
 
-from utils import get_device, train_epoch, test_epoch, split_train_dataset, get_predictions, EarlyStopping, get_model_choice
+from utils import (
+    get_device,
+    train_epoch,
+    test_epoch,
+    split_train_dataset,
+    get_predictions,
+    EarlyStopping,
+    get_model_choice,
+    get_transforms,
+    get_model_image_size,
+    prompt_save_model,
+    save_model,
+)
 
 device = get_device()
 
@@ -180,6 +192,16 @@ def main():
     )
 
     print(f"\nAll results saved to: {results_dir}")
+
+    if prompt_save_model():
+        try:
+            save_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "trained_models")
+            save_path = save_model(model, model_type, test_acc, save_dir)
+            print(f"Model saved successfully to: {save_path}")
+        except Exception as e:
+            print(f"Error saving model: {e}")
+    else:
+        print("Model not saved.")
 
 
 if __name__ == "__main__":
