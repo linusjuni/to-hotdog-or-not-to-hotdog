@@ -16,8 +16,10 @@ from utils import get_device, train_epoch, test_epoch, split_train_dataset, get_
 
 device = get_device()
 
-
 def main():
+    # Model to train (cnn or custom_resnet)
+    model_type = get_model_choice()
+
     # Hyperparameters
     batch_size = 32
     num_epochs = 20
@@ -69,7 +71,7 @@ def main():
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
     # Create model
-    model = get_model("cnn", num_classes=2, dropout_rate=0.5)
+    model = get_model(model_type=model_type, num_classes=2, dropout_rate=0.5)
     model.to(device)
 
     print(f"Model has {count_parameters(model)} trainable parameters")
