@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import random_split
+import torchvision.transforms as transforms
 
 
 def get_device():
@@ -183,3 +184,92 @@ def get_predictions(model, data_loader, device):
             all_targets.extend(target.cpu().numpy())
     
     return all_predictions, all_targets
+
+
+def get_model_image_size(model_type):
+    """
+    Get the appropriate image size for different model types.
+    """
+    size_mapping = {
+        'cnn': 128,
+        'custom_resnet': 128,
+        'efficientnet': 224,
+    }
+    
+    return size_mapping.get(model_type, 128)
+
+
+def get_transforms(model_type, image_size=None):
+    """
+    Get appropriate transforms based on model type.
+    
+    Args:
+        model_type (str): Type of model
+        image_size (int, optional): Image size. If None, uses model-specific default.
+    """
+    # Use model-specific image size if not provided
+    if image_size is None:
+        image_size = get_model_image_size(model_type)
+    
+    print(f"Using image size: {image_size}x{image_size}")
+    
+    # ImageNet normalization for transfer learning models
+    imagenet_mean = [0.485, 0.456, 0.406]
+    imagenet_std = [0.229, 0.224, 0.225]
+    
+    # Custom normalization for models trained from scratch
+    custom_mean = [0.5, 0.5, 0.5]
+    custom_std = [0.5, 0.5, 0.5]
+    
+    # Choose normalization based on model type
+    if model_type in ['efficientnet']:  # Add other transfer learning models here
+        mean, std = imagenet_mean, imagenet_std
+    else:
+        mean, std = custom_mean, custom_std
+
+    
+    train_transform = transforms.Compose([
+        transforms.Resize((image_size, image_size)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(degrees=15),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+        transforms.RandomPerspective(distortion_scale=0.2, p=0.5),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+        transforms.RandomErasing(p=0.2, scale=(0.02, 0.33)),
+    ])
+
+    test_transform = transforms.Compose([
+        transforms.Resize((image_size, image_size)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=mean, std=std),
+    ])
+    
+    return train_transform, test_transform
+
+
+def get_model_choice():
+    """Prompt user to select which model to train."""
+    print("Available models:")
+    print("1. CNN")
+    print("2. Custom ResNet")
+    print("3. EfficientNet-B0 (Transfer Learning)")
+    
+    while True:
+        try:
+            choice = input("\nPlease select a model (1, 2, or 3): ").strip()
+            
+            if choice == "1":
+                return "cnn"
+            elif choice == "2":
+                return "custom_resnet"
+            elif choice == "3":
+                return "efficientnet"
+            else:
+                print("Invalid choice. Please enter 1, 2, or 3.")
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            exit(0)
+        except Exception as e:
+            print(f"Error: {e}. Please try again.")
