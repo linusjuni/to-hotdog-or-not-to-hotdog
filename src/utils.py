@@ -126,3 +126,26 @@ def get_predictions(model, data_loader, device):
             all_targets.extend(target.cpu().numpy())
     
     return all_predictions, all_targets
+
+
+def get_model_choice():
+    """Prompt user to select which model to train."""
+    print("Available models:")
+    print("1. CNN")
+    print("2. Custom ResNet")
+    
+    while True:
+        try:
+            choice = input("\nPlease select a model (1 or 2): ").strip()
+            
+            if choice == "1":
+                return "cnn"
+            elif choice == "2":
+                return "custom_resnet"
+            else:
+                print("Invalid choice. Please enter 1 or 2.")
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            exit(0)
+        except Exception as e:
+            print(f"Error: {e}. Please try again.")
