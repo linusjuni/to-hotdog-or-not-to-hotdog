@@ -1,6 +1,10 @@
 import torch
 from torch.utils.data import random_split
 import torchvision.transforms as transforms
+import os
+from datetime import datetime
+
+from models.models import count_parameters
 
 
 def get_device():
@@ -247,6 +251,58 @@ def get_transforms(model_type, image_size=None):
     ])
     
     return train_transform, test_transform
+
+def save_model(model, model_type, test_acc, save_dir="models/trained_models"):
+    """
+    Save a trained model with metadata.
+    
+    Args:
+        model: Trained PyTorch model
+        model_type (str): Type of model (e.g., 'cnn', 'custom_resnet', 'efficientnet')
+        test_acc (float): Test accuracy achieved by the model
+        save_dir (str): Directory to save the model
+    
+    Returns:
+        str: Path where the model was saved
+    """
+    
+    # Create directory if it doesn't exist
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # Generate filename with timestamp and accuracy
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{model_type}_acc{test_acc:.1f}_{timestamp}.pth"
+    save_path = os.path.join(save_dir, filename)
+    
+    # Save model state dict along with metadata
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'model_type': model_type,
+        'test_accuracy': test_acc,
+        'timestamp': timestamp,
+        'num_parameters': count_parameters(model)
+    }, save_path)
+    
+    return save_path
+
+
+def prompt_save_model():
+    """Prompt user whether to save the model."""
+    while True:
+        try:
+            choice = input("\nWould you like to save this trained model? (y/n): ").strip().lower()
+            
+            if choice in ['y', 'yes']:
+                return True
+            elif choice in ['n', 'no']:
+                return False
+            else:
+                print("Please enter 'y' for yes or 'n' for no.")
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            return False
+        except Exception as e:
+            print(f"Error: {e}. Please try again.")
 
 
 def get_model_choice():
