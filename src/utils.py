@@ -14,6 +14,63 @@ def get_device():
         device = torch.device("cpu")
     return device
 
+class EarlyStopping:
+    """Early stops the training if validation loss doesn't improve after a given patience."""
+    
+    def __init__(self, patience=7, min_delta=0.001, restore_best_weights=True, verbose=True):
+        """
+        Args:
+            patience (int): How long to wait after last time validation loss improved.
+                           Default: 7
+            min_delta (float): Minimum change in the monitored quantity to qualify as an improvement.
+                              Default: 0.001
+            restore_best_weights (bool): Whether to restore model weights from the epoch with the best value
+            verbose (bool): If True, prints a message for each validation loss improvement.
+        """
+        self.patience = patience
+        self.min_delta = min_delta
+        self.restore_best_weights = restore_best_weights
+        self.verbose = verbose
+        self.counter = 0
+        self.best_loss = float('inf')
+        self.early_stop = False
+        self.best_weights = None
+        
+    def __call__(self, val_loss, model):
+        """
+        Call this method after each epoch with the validation loss and model.
+        
+        Args:
+            val_loss (float): Current validation loss
+            model: The model being trained
+            
+        Returns:
+            bool: True if training should stop, False otherwise
+        """
+        if val_loss < self.best_loss - self.min_delta:
+            # Validation loss improved
+            self.best_loss = val_loss
+            self.counter = 0
+            if self.restore_best_weights:
+                # Save the current best weights
+                self.best_weights = {k: v.clone() for k, v in model.state_dict().items()}
+            if self.verbose:
+                print(f"Validation loss improved to {val_loss:.6f}")
+        else:
+            # Validation loss didn't improve
+            self.counter += 1
+            if self.verbose:
+                print(f"No improvement in validation loss for {self.counter} epoch(s)")
+            
+            if self.counter >= self.patience:
+                self.early_stop = True
+                if self.restore_best_weights and self.best_weights is not None:
+                    model.load_state_dict(self.best_weights)
+                    if self.verbose:
+                        print(f"Restored model weights from best epoch (val_loss: {self.best_loss:.6f})")
+                
+        return self.early_stop
+
 
 def train_epoch(model, train_loader, criterion, optimizer, device):
     """Train the model for one epoch"""

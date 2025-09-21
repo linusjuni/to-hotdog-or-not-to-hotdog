@@ -22,19 +22,25 @@ def main():
 
     # Hyperparameters
     batch_size = 32
-    num_epochs = 2
+    num_epochs = 20
     learning_rate = 0.001
     image_size = 128
+    weight_decay = 1e-4
+    early_stopping_patience = 5
+    early_stopping_min_delta = 0.001
 
     # Data transforms
-    train_transform = transforms.Compose(
-        [
-            transforms.Resize((image_size, image_size)),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        ]
-    )
+    train_transform = transforms.Compose([
+        transforms.Resize((image_size, image_size)),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomRotation(degrees=15),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+        transforms.RandomPerspective(distortion_scale=0.2, p=0.5),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        transforms.RandomErasing(p=0.2, scale=(0.02, 0.33)),
+    ])
 
     test_transform = transforms.Compose(
         [
@@ -90,7 +96,15 @@ def main():
 
     # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
+    # Initialize early stopping
+    early_stopping = EarlyStopping(
+        patience=early_stopping_patience,
+        min_delta=early_stopping_min_delta,
+        restore_best_weights=True,
+        verbose=True
+    )
 
     # Lists to store training history
     train_losses = []
@@ -119,6 +133,13 @@ def main():
 
         print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")
         print(f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%")
+
+        # Check early stopping
+        if early_stopping(val_loss, model):
+            print(f"\nEarly stopping triggered after {epoch + 1} epochs!")
+            break
+
+    print(f"\nTraining completed after {len(train_losses)} epochs")
 
     # Final test on test set
     print("\nFinal evaluation on test set:")
