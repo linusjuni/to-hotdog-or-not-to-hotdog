@@ -35,32 +35,14 @@ def main():
     # Hyperparameters
     batch_size = 32
     num_epochs = 20
-    learning_rate = 0.001
-    image_size = 128
+    learning_rate = 0.0001
+    image_size = get_model_image_size(model_type)
     weight_decay = 1e-4
     early_stopping_patience = 5
     early_stopping_min_delta = 0.001
 
-    # Data transforms
-    train_transform = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomRotation(degrees=15),
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
-        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),
-        transforms.RandomPerspective(distortion_scale=0.2, p=0.5),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        transforms.RandomErasing(p=0.2, scale=(0.02, 0.33)),
-    ])
-
-    test_transform = transforms.Compose(
-        [
-            transforms.Resize((image_size, image_size)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        ]
-    )
+    # Get model-specific transforms
+    train_transform, test_transform = get_transforms(model_type, image_size)
 
     # Set data path relative to script location
     data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")

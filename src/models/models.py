@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+from efficientnet_pytorch import EfficientNet
 
 
 class ConvNet(nn.Module):
@@ -130,11 +131,53 @@ class CustomResNet(nn.Module):
         return x
 
 
+class EfficientNetTransfer(nn.Module):
+    """EfficientNet-B0 with transfer learning for hotdog classification"""
+    
+    def __init__(self, num_classes=2, dropout_rate=0.5, freeze_backbone=True):
+        super(EfficientNetTransfer, self).__init__()
+        
+        # Load pre-trained EfficientNet-B0
+        self.backbone = EfficientNet.from_pretrained('efficientnet-b0')
+        
+        # Freeze backbone parameters if specified
+        if freeze_backbone:
+            for param in self.backbone.parameters():
+                param.requires_grad = False
+        
+        # Get the number of features from the backbone
+        # EfficientNet-B0 has 1280 features before the final classifier
+        in_features = self.backbone._fc.in_features
+        
+        # Replace the classifier with our custom head
+        self.backbone._fc = nn.Identity()  # Remove original classifier
+        
+        # Custom classifier head
+        self.classifier = nn.Sequential(
+            nn.Dropout(dropout_rate),
+            nn.Linear(in_features, 512),
+            nn.ReLU(inplace=True),
+            nn.BatchNorm1d(512),
+            nn.Dropout(dropout_rate * 0.5),
+            nn.Linear(512, num_classes)
+        )
+    
+    def forward(self, x):
+        # Extract features using backbone
+        features = self.backbone(x)
+        
+        # Apply custom classifier
+        output = self.classifier(features)
+        
+        return output
+
+
 def get_model(model_type="simple", **kwargs):
     """Factory function to get different model types"""
     models_dict = {
         "cnn": ConvNet,
         "custom_resnet": CustomResNet,
+        "efficientnet": EfficientNetTransfer,
     }
 
     if model_type not in models_dict:

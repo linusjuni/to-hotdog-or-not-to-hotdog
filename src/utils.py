@@ -310,17 +310,20 @@ def get_model_choice():
     print("Available models:")
     print("1. CNN")
     print("2. Custom ResNet")
+    print("3. EfficientNet-B0 (Transfer Learning)")
     
     while True:
         try:
-            choice = input("\nPlease select a model (1 or 2): ").strip()
+            choice = input("\nPlease select a model (1, 2, or 3): ").strip()
             
             if choice == "1":
                 return "cnn"
             elif choice == "2":
                 return "custom_resnet"
+            elif choice == "3":
+                return "efficientnet"
             else:
-                print("Invalid choice. Please enter 1 or 2.")
+                print("Invalid choice. Please enter 1, 2, or 3.")
         except KeyboardInterrupt:
             print("\nExiting...")
             exit(0)
