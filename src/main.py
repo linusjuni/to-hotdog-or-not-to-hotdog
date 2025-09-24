@@ -185,7 +185,7 @@ def main():
                 model,
                 test_loader,
                 device,
-                num_samples=6,
+                num_samples=3,
                 save_path=os.path.join(results_dir, "saliency_maps.png"),
             )
 
