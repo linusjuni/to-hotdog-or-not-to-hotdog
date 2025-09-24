@@ -161,6 +161,38 @@ def split_train_dataset(dataset, train_ratio=0.85, val_ratio=0.15, seed=42):
 
     return train_dataset, val_dataset
 
+
+def load_model(model_path, device=None):
+    """
+    Load a trained model from a .pth file.
+    """
+    if device is None:
+        device = get_device()
+
+    # Load the saved data
+    checkpoint = torch.load(model_path, map_location=device)
+
+    # Get model info from checkpoint
+    model_type = checkpoint["model_type"]
+
+    # Recreate the model architecture
+    from models.models import get_model
+
+    model = get_model(model_type=model_type, num_classes=2, dropout_rate=0.5)
+
+    # Load the trained weights
+    model.load_state_dict(checkpoint["model_state_dict"])
+
+    # Move to device
+    model.to(device)
+
+    print(f"Loaded {model_type} model from {model_path}")
+    print(f"Test accuracy: {checkpoint.get('test_accuracy', 'N/A'):.2f}%")
+
+    return model
+    
+
+
 def get_predictions(model, data_loader, device):
     """
     Get predictions and true labels for a dataset.
@@ -295,6 +327,30 @@ def prompt_save_model():
             if choice in ['y', 'yes']:
                 return True
             elif choice in ['n', 'no']:
+                return False
+            else:
+                print("Please enter 'y' for yes or 'n' for no.")
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            return False
+        except Exception as e:
+            print(f"Error: {e}. Please try again.")
+
+def prompt_saliency_maps():
+    """Prompt user whether to generate saliency maps."""
+    while True:
+        try:
+            choice = (
+                input(
+                    "\nWould you like to generate saliency maps to see what the model focuses on? (y/n): "
+                )
+                .strip()
+                .lower()
+            )
+
+            if choice in ["y", "yes"]:
+                return True
+            elif choice in ["n", "no"]:
                 return False
             else:
                 print("Please enter 'y' for yes or 'n' for no.")

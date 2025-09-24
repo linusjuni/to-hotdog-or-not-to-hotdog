@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
-import torch
 
 # Set seaborn style and palette
 sns.set_style("whitegrid")
