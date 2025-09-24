@@ -1,6 +1,5 @@
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 import os
 
@@ -11,6 +10,8 @@ from visualizations.training_plots import (
     plot_confusion_matrix,
     save_training_history,
 )
+
+from visualizations.saliency_maps import plot_saliency_maps
 
 from utils import (
     get_device,
@@ -24,6 +25,7 @@ from utils import (
     get_model_image_size,
     prompt_save_model,
     save_model,
+    prompt_saliency_maps
 )
 
 device = get_device()
@@ -90,14 +92,16 @@ def main():
 
     # Loss function and optimizer
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimizer = optim.Adam(
+        model.parameters(), lr=learning_rate, weight_decay=weight_decay
+    )
 
     # Initialize early stopping
     early_stopping = EarlyStopping(
         patience=early_stopping_patience,
         min_delta=early_stopping_min_delta,
         restore_best_weights=True,
-        verbose=True
+        verbose=True,
     )
 
     # Lists to store training history
@@ -173,11 +177,25 @@ def main():
         save_path=os.path.join(results_dir, "training_history.csv"),
     )
 
+    # Generate saliency maps for transfer learning models
+    if model_type == "efficientnet":
+        if prompt_saliency_maps():
+            print("\nGenerating saliency maps...")
+            plot_saliency_maps(
+                model,
+                test_loader,
+                device,
+                num_samples=6,
+                save_path=os.path.join(results_dir, "saliency_maps.png"),
+            )
+
     print(f"\nAll results saved to: {results_dir}")
 
     if prompt_save_model():
         try:
-            save_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "trained_models")
+            save_dir = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "models", "trained_models"
+            )
             save_path = save_model(model, model_type, test_acc, save_dir)
             print(f"Model saved successfully to: {save_path}")
         except Exception as e:

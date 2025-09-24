@@ -304,6 +304,30 @@ def prompt_save_model():
         except Exception as e:
             print(f"Error: {e}. Please try again.")
 
+def prompt_saliency_maps():
+    """Prompt user whether to generate saliency maps."""
+    while True:
+        try:
+            choice = (
+                input(
+                    "\nWould you like to generate saliency maps to see what the model focuses on? (y/n): "
+                )
+                .strip()
+                .lower()
+            )
+
+            if choice in ["y", "yes"]:
+                return True
+            elif choice in ["n", "no"]:
+                return False
+            else:
+                print("Please enter 'y' for yes or 'n' for no.")
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            return False
+        except Exception as e:
+            print(f"Error: {e}. Please try again.")
+
 
 def get_model_choice():
     """Prompt user to select which model to train."""
